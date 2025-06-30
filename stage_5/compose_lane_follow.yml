@@ -10,7 +10,7 @@ services:
     environment:
       - DISPLAY=${DISPLAY}
       - QT_X11_NO_MITSHM=1
-      - ROS_DOMAIN_ID=5 # replace with botID
+      - ROS_DOMAIN_ID=10 # replace with botID
       - ROS_LOCALHOST_ONLY=0
       - IKI_GIT=${IKI_WORKSPACE}/ros2_ws
       - ROS_WS=/root

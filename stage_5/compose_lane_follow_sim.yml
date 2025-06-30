@@ -29,5 +29,5 @@ services:
         source /usr/share/gazebo/setup.bash &&
         source /root/install/setup.bash &&
         echo 'Starting lane following simulation...' &&
-        ros2 run autorace_real follow_line_real --ros-args -p line:=yellow
+        ros2 run autorace_real follow_line_real --ros-args -p line:=white
       "

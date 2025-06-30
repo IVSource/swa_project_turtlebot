@@ -41,7 +41,7 @@ class ImageSubscriber(Node):
         self.laser_scan = None
         self.lines_right = []
         self.lines_left = []
-        self.build_target = 1  # 1 is real bot, 0 is simulated bot
+        self.build_target = 0  # 1 is real bot, 0 is simulated bot
         # setup main loop
         timer_period = 0.5  # seconds
         self.timer = self.create_timer(timer_period, self.main_loop)
@@ -131,16 +131,15 @@ class ImageSubscriber(Node):
         masked_image = ocv.bitwise_and(
             current_frame_hsv, current_frame_hsv, mask=white_mask)
         masked_image = ocv.cvtColor(masked_image, ocv.COLOR_HSV2BGR)
+        masked_image = ocv.resize(masked_image, (250, 160))
 
         display_image = ocv.cvtColor(self.current_frame, ocv.COLOR_RGB2BGR)
-        display_image = ocv.resize(display_image, (240, 160))
+        display_image = ocv.resize(display_image, (250, 160))
         ocv.imshow("masked image", masked_image)
         ocv.waitKey(1)
-        # display_image = display_image[slice(160 // 2, 160), 240//2:]
         eval_image = ocv.cvtColor(display_image, ocv.COLOR_BGR2GRAY)
-        eval_image = ocv.Canny(eval_image, 130, 200)
+        eval_image = ocv.Canny(eval_image, 100, 150)
         display_image = eval_image
-        # lines = ocv.HoughLinesP(display_image, 1, np.pi/180, threshold=30, minLineLength=40, maxLineGap=7)
         display_image = ocv.cvtColor(display_image, ocv.COLOR_GRAY2BGR)
         ocv.imshow("edges", display_image)
         ocv.waitKey(1)
@@ -160,14 +159,13 @@ class ImageSubscriber(Node):
                 self.lines_left.append(120 - line_edge_idx)
 
     def follow_lines_right(self) -> int:
-        command = Twist()
         latral_offset = 0
         if len(self.lines_right) > 0:
             self.lines_right = np.array(self.lines_right)
-            self.get_logger().info(f'self.lines_right')
+            self.get_logger().info(f'Lines right: {self.lines_right}')
             # offset from the center of the image, since were only looking at the right half of the image
             if self.build_target == 1:
-                learned_offset_bias = 205 - 120  # real robot
+                learned_offset_bias = 185 - 120  # real robot
             else:
                 learned_offset_bias = 180 - 120  # simulated robot
             latral_offset = self.lines_right.mean() - learned_offset_bias
@@ -181,10 +179,10 @@ class ImageSubscriber(Node):
         latral_offset = 0
         if len(self.lines_left) > 0:
             self.lines_left = np.array(self.lines_left)
-            self.get_logger().info(f'self.lines_left')
+            self.get_logger().info(f'Lines left: {self.lines_left}')
             # offset from the center of the image, since were only looking at the left half of the image
             if self.build_target == 1:
-                learned_offset_bias = 45  # real robot
+                learned_offset_bias = 30  # real robot
             else:
                 learned_offset_bias = 60  # simulated robot
             latral_offset = self.lines_left.mean() - learned_offset_bias
@@ -199,10 +197,10 @@ class ImageSubscriber(Node):
         command = Twist()
         if self.build_target == 1:
             command.angular.z = -0.35 * \
-                np.tanh(latral_offset / 15)  # real robot
+                np.tanh(latral_offset / 10)  # real robot
         else:
             command.angular.z = -0.35 * \
-                np.tanh(latral_offset / 20)  # simulated robot
+                np.tanh(latral_offset / 10)  # simulated robot
         command.linear.x = 0.15 * np.exp(-np.abs(latral_offset) / 30)
         self.drive_control.publish(command)
 

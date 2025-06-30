@@ -20,9 +20,7 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-            'start_signal_real = autorace_real.start_signal_real:main',
-            'follow_wall_real = autorace_real.follow_wall_real:main',
-            'follow_line_real = autorace_real.follow_line_real:main',
+            'follow_line_real = autorace_real.follow_line_real:main'
         ],
     },
 )
