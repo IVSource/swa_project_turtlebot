@@ -1,0 +1,41 @@
+version: "3.8"
+
+services:
+  starter_runner:
+    image: fbe-dockerreg.rwu.de/doz-iki/staehle-vls/amr-tb3:latest
+    container_name: enter_tunnel_sim
+    privileged: true
+    network_mode: host
+    ipc: host
+    environment:
+      - DISPLAY=${DISPLAY}
+      - QT_X11_NO_MITSHM=1
+      - TERM=${TERM}
+      - ROS_DOMAIN_ID=42 # replace with botID
+      - ROS_LOCALHOST_ONLY=1
+      - IKI_GIT=${IKI_WORKSPACE}
+      - ROS_WS=/root
+      - TURTLEBOT3_MODEL=burger
+    volumes:
+      - /tmp/.X11-unix:/tmp/.X11-unix
+      - ${IKI_WORKSPACE}:/root
+    command: >
+      bash -c "
+        source /opt/ros/humble/setup.bash &&
+        source /usr/share/gazebo/setup.bash &&
+        source /root/ros2_ws/install/setup.bash &&
+        ros2 launch tb3_rwu_arena tb3_sim.launch.py x:=-1.74 y:=0.21 yaw:=-1.57 &
+        source /opt/ros/humble/setup.bash &&
+        source /usr/share/gazebo/setup.bash &&
+        source /root/ros2_ws/install/setup.bash &&
+        sleep 7 &&
+        clear &&
+        echo 'Starting enter tunnel service...' &&
+        ros2 run autorace_real tunnel_detector_srv &
+        source /opt/ros/humble/setup.bash &&
+        source /usr/share/gazebo/setup.bash &&
+        source /root/ros2_ws/install/setup.bash &&
+        sleep 5 &&
+        echo 'Starting enter tunnel node...' &&
+        ros2 run autorace_real enter_tunnel_real
+      "
