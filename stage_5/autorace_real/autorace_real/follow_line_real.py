@@ -11,7 +11,7 @@ from sensor_msgs.msg import LaserScan
 from rclpy.qos import QoSProfile, QoSReliabilityPolicy
 
 
-class ImageSubscriber(Node):
+class LineFollower(Node):
 
     current_frame = None
 
@@ -204,16 +204,10 @@ class ImageSubscriber(Node):
         command.linear.x = 0.15 * np.exp(-np.abs(latral_offset) / 30)
         self.drive_control.publish(command)
 
-    def stop_robot(self):
-        msg = Twist()
-        msg.linear.x = 0.0
-        msg.angular.z = 0.0
-        self.publisher.publish(msg)
-
 
 def main(args=None):
     rclpy.init(args=args)
-    image_subscriber = ImageSubscriber()
+    image_subscriber = LineFollower()
     rclpy.spin(image_subscriber)
     image_subscriber.destroy_node()
     rclpy.shutdown()

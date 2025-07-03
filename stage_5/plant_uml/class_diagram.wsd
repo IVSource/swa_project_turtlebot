@@ -1,0 +1,36 @@
+@startuml
+
+rclpy.node.Node <|-- LineFollower
+
+class LineFollower {
+    - current_frame
+    - line_to_follow
+    - driving_mode
+    - last_driving_mode
+    - laser_scan
+    - lines_right
+    - lines_left
+    - build_target
+    - timer
+    - img_data_listener
+    - br
+    - scan_listener
+    - drive_control
+
+    + __init__()
+    + store_image(data)
+    + store_scan(msg)
+    + main_loop()
+    + is_emergency_brake_active() : bool
+    + process_image()
+    + follow_lines_right() : int
+    + follow_lines_left() : int
+    + steer_robot(latral_offset: float)
+    + stop_robot()
+}
+
+LineFollower --> "1" CvBridge : uses
+LineFollower --> "1" Twist : publishes
+LineFollower --> "1" LaserScan : subscribes
+LineFollower --> "1" Image : subscribes
+@enduml
