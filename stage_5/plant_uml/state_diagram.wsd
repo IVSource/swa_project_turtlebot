@@ -1,0 +1,29 @@
+@startuml LineFollower
+left to right direction
+
+[*] --> SensorCheck : ros2 run node
+
+state SensorCheck {
+  [*] --> waitForLaserData
+  waitForLaserData --> waitForCameraData : laserDataReceived
+}
+
+state Drive {
+  [H*] --> FollowLineLeft : followYellowSelected
+  [H*] --> FollowLineRight : followWhiteSelected
+  FollowLineRight --> FollowLineRight : rightMarkingAvailable
+  FollowLineLeft --> FollowLineLeft : leftMarkingAvailable
+  FollowLineLeft --> FollowLineRight : NO leftMarkingAvailable
+  FollowLineRight --> FollowLineLeft : NO rightMarkingAvailable
+}
+
+Stopped --> Stopped : emergencyBrakeEngaged
+
+SensorCheck.waitForCameraData --> Drive : cameraDataReceived
+Drive.FollowLineRight --> Stopped : emergencyBrakeEngaged
+Drive.FollowLineLeft --> Stopped : emergencyBrakeEngaged
+Stopped --> Drive : emergencyBrakeReleased
+Stopped --> SensorCheck : sensorDataLost
+Drive --> SensorCheck : sensorDataLost
+
+@enduml

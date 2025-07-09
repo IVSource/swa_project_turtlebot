@@ -1,0 +1,23 @@
+@startuml
+left to right direction
+skinparam componentStyle rectangle
+!theme cerulean
+
+rectangle "turtlebot" {
+    node "<img:./docker-mark-blue.png{scale=0.01}> iki_ros(1)" {
+        entity "Camera"
+        entity "DiffDrive"
+        entity "Lidar"
+        entity "IMU"
+    }
+}
+
+rectangle "laptop" {
+    node "<img:./docker-mark-blue.png{scale=0.01}> iki_ros(2)" {
+        component "lane_follower"
+    }
+}
+
+"turtlebot" <--> "laptop" : DDS over UDP
+
+@enduml

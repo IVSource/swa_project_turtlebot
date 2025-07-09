@@ -1,0 +1,62 @@
+@startuml main_loop
+entity ROS2_EnV
+participant "Main" as main
+participant "Sensor Data Check" as dataChack
+participant "Process Image" as CV
+participant "Emergency Brake" as EB
+participant "Follow Line" as LineFollower
+entity "Drive Controller" as DC
+
+ROS2_EnV -> main ++ : timer event
+main -> dataChack ++
+dataChack -> main -- : sensorDataStatus
+alt sensorDataLost
+    main -> ROS2_EnV
+end
+
+main -> CV ++
+CV -> main --
+
+main -> EB ++
+alt obstacleDetected
+EB --> DC : stopCommand
+end
+EB -> main -- : emergencyBrakeStatus
+
+alt emergencyBrakeEngaged
+    main -> ROS2_EnV
+end
+
+main -> LineFollower ++
+LineFollower --> DC : driveCommand
+LineFollower -> main -- : whichLineToFollow
+main -> ROS2_EnV --
+@enduml
+
+@startuml lidar_data
+entity ROS2_EnV
+participant "Lidar Data Handler" as lidarData
+ROS2_EnV -> lidarData ++ : lidarDataAvailable
+lidarData -> lidarData ++ : storeLidarData
+lidarData -> ROS2_EnV --
+@enduml
+
+@startuml camera_data
+entity ROS2_EnV
+participant "Camera Data Handler" as cameraData
+ROS2_EnV -> cameraData ++ : newImageAvailable
+cameraData -> cameraData ++ : storeImageData
+cameraData -> ROS2_EnV --
+@enduml
+
+@startuml
+participant Client
+participant Server
+
+Client -> Server : Request
+alt Valid request
+    Server -> Client : Success response
+else Invalid request
+    Server -> Client : Error response
+end
+@enduml
